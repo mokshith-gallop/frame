@@ -1,0 +1,550 @@
+# =============================================================================
+# partition-cluster.mvs.yaml — partition + cluster + key intent verification
+# Serves AC4. Declares partition_by, cluster_by, and partition_expiration_days
+# for all 100 tables per the locked Physical Access matrix.
+# =============================================================================
+name: partition_cluster_matrix
+
+connections:
+  target: { engine: bigquery }
+
+migration:
+  steps:
+    - { kind: ddl, sql: bigquery/ddl/02-staging-sqoop-mirrors.sql }
+    - { kind: ddl, sql: bigquery/ddl/03-staging-delta-feeds.sql }
+    - { kind: ddl, sql: bigquery/ddl/04-staging-file-feeds.sql }
+    - { kind: ddl, sql: bigquery/ddl/05-ods-cleanse.sql }
+    - { kind: ddl, sql: bigquery/ddl/06-ods-delta-scd2.sql }
+    - { kind: ddl, sql: bigquery/ddl/07-ods-acid.sql }
+    - { kind: ddl, sql: bigquery/ddl/08-dm-tables.sql }
+    - { kind: ddl, sql: bigquery/ddl/09-dm-views.sql }
+
+suites:
+  - pattern: schema_conformance
+    id: partition-cluster-matrix
+    target_dataset: "${BUILD_DATASET}"
+    tables:
+      - table: stg_crm_client
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_crm_client_contact
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_crm_program
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_crm_contract
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_crm_contract_line
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_crm_sla_target
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_hr_agent
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_hr_org_unit
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_hr_employment_event
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_hr_skill
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_hr_agent_skill
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_wfm_shift
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_wfm_schedule
+        partition_by: load_date
+        cluster_by: [site_code]
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+          - { name: site_code, type: STRING }
+      - table: stg_wfm_adherence_event
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_wfm_forecast
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_wfm_timeoff_request
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_tel_call
+        partition_by: load_date
+        cluster_by: [call_id]
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+          - { name: call_id, type: INT64 }
+      - table: stg_tel_call_segment
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_tel_queue
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_tel_agent_state_event
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_tel_disposition_code
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_tkt_ticket
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_tkt_ticket_event
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_tkt_category
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_fin_invoice
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_fin_invoice_line
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_fin_rate_card
+        partition_by: load_date
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: load_date, type: DATE }
+      - table: stg_fin_timesheet_delta
+        partition_by: extract_ts
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: extract_ts, type: DATE }
+      - table: stg_fin_payroll_adj_delta
+        partition_by: extract_ts
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: extract_ts, type: DATE }
+      - table: stg_crm_sla_credit_delta
+        partition_by: extract_ts
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: extract_ts, type: DATE }
+      - table: stg_tel_callback_request_delta
+        partition_by: extract_ts
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: extract_ts, type: DATE }
+      - table: stg_wfm_shift_swap_delta
+        partition_by: extract_ts
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: extract_ts, type: DATE }
+      - table: stg_tkt_worklog_delta
+        partition_by: extract_ts
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: extract_ts, type: DATE }
+      - table: stg_hr_attrition_event_delta
+        partition_by: extract_ts
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: extract_ts, type: DATE }
+      - table: stg_fin_rate_card_change_delta
+        partition_by: extract_ts
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: extract_ts, type: DATE }
+      - table: stg_file_interaction_export
+        partition_by: feed_date
+        cluster_by: [client_code]
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: feed_date, type: DATE }
+          - { name: client_code, type: STRING }
+      - table: stg_file_survey_csat
+        partition_by: feed_date
+        cluster_by: [client_code]
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: feed_date, type: DATE }
+          - { name: client_code, type: STRING }
+      - table: stg_file_qa_forms
+        partition_by: feed_date
+        cluster_by: [client_code]
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: feed_date, type: DATE }
+          - { name: client_code, type: STRING }
+      - table: stg_file_ivr_logs
+        partition_by: feed_date
+        cluster_by: [client_code]
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: feed_date, type: DATE }
+          - { name: client_code, type: STRING }
+      - table: stg_file_chat_transcripts
+        partition_by: feed_date
+        cluster_by: [client_code]
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: feed_date, type: DATE }
+          - { name: client_code, type: STRING }
+      - table: stg_file_roster
+        partition_by: feed_date
+        cluster_by: [client_code]
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: feed_date, type: DATE }
+          - { name: client_code, type: STRING }
+      - table: stg_file_telco_invoice
+        partition_by: feed_date
+        cluster_by: [client_code]
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: feed_date, type: DATE }
+          - { name: client_code, type: STRING }
+      - table: stg_file_dialer_result
+        partition_by: feed_date
+        cluster_by: [client_code]
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: feed_date, type: DATE }
+          - { name: client_code, type: STRING }
+      - table: stg_file_email_interaction
+        partition_by: feed_date
+        cluster_by: [client_code]
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: feed_date, type: DATE }
+          - { name: client_code, type: STRING }
+      - table: stg_file_speech_analytics
+        partition_by: feed_date
+        cluster_by: [client_code]
+        table_options:
+          partition_expiration_days: 90
+        columns:
+          - { name: feed_date, type: DATE }
+          - { name: client_code, type: STRING }
+      - table: ods_program
+        partition_by: snapshot_date
+        columns:
+          - { name: snapshot_date, type: DATE }
+      - table: ods_contract
+        partition_by: snapshot_date
+        columns:
+          - { name: snapshot_date, type: DATE }
+      - table: ods_contract_line
+        partition_by: snapshot_date
+        columns:
+          - { name: snapshot_date, type: DATE }
+      - table: ods_org_unit
+        partition_by: snapshot_date
+        columns:
+          - { name: snapshot_date, type: DATE }
+      - table: ods_queue
+        partition_by: snapshot_date
+        columns:
+          - { name: snapshot_date, type: DATE }
+      - table: ods_schedule
+        partition_by: sched_date
+        columns:
+          - { name: sched_date, type: DATE }
+      - table: ods_adherence_event
+        partition_by: event_date
+        columns:
+          - { name: event_date, type: DATE }
+      - table: ods_call
+        partition_by: call_date
+        columns:
+          - { name: call_date, type: DATE }
+      - table: ods_ivr_session
+        partition_by: event_date
+        columns:
+          - { name: event_date, type: DATE }
+      - table: ods_chat_session
+        partition_by: event_date
+        columns:
+          - { name: event_date, type: DATE }
+      - table: ods_email_interaction
+        partition_by: event_date
+        columns:
+          - { name: event_date, type: DATE }
+      - table: ods_survey_response
+        partition_by: event_date
+        columns:
+          - { name: event_date, type: DATE }
+      - table: ods_qa_evaluation
+        partition_by: event_date
+        columns:
+          - { name: event_date, type: DATE }
+      - table: ods_interaction
+        partition_by: event_date
+        columns:
+          - { name: event_date, type: DATE }
+      - table: ods_dialer_attempt
+        partition_by: event_date
+        columns:
+          - { name: event_date, type: DATE }
+      - table: ods_timesheet
+        partition_by: work_month
+        columns:
+          - { name: work_month, type: DATE }
+      - table: ods_payroll_adjustment
+        partition_by: period_month
+        columns:
+          - { name: period_month, type: DATE }
+      - table: ods_sla_credit
+        partition_by: period_month
+        columns:
+          - { name: period_month, type: DATE }
+      - table: ods_callback_request
+        partition_by: event_date
+        columns:
+          - { name: event_date, type: DATE }
+      - table: ods_shift_swap
+        partition_by: swap_month
+        columns:
+          - { name: swap_month, type: DATE }
+      - table: ods_ticket_worklog
+        partition_by: event_date
+        columns:
+          - { name: event_date, type: DATE }
+      - table: ods_attrition_event
+        partition_by: event_month
+        columns:
+          - { name: event_month, type: DATE }
+      - table: ods_rate_card
+        partition_by: snapshot_date
+        columns:
+          - { name: snapshot_date, type: DATE }
+      - table: ods_agent_scd2
+        partition_by: eff_from_year
+        columns:
+          - { name: eff_from_year, type: INT64 }
+      - table: ods_agent_skill_scd2
+        partition_by: eff_from_year
+        columns:
+          - { name: eff_from_year, type: INT64 }
+      - table: ods_agent_assignment_scd2
+        partition_by: eff_from_year
+        columns:
+          - { name: eff_from_year, type: INT64 }
+      - table: ods_client_acid
+        cluster_by: [client_id]
+        columns:
+          - { name: client_id, type: INT64 }
+      - table: ods_agent_acid
+        cluster_by: [agent_id]
+        columns:
+          - { name: agent_id, type: INT64 }
+      - table: ods_ticket_acid
+        cluster_by: [ticket_id]
+        columns:
+          - { name: ticket_id, type: INT64 }
+      - table: ods_invoice_acid
+        cluster_by: [invoice_id]
+        columns:
+          - { name: invoice_id, type: INT64 }
+      - table: dim_date
+        columns:
+          - { name: date_sk, type: INT64 }
+      - table: dim_agent
+        columns:
+          - { name: agent_sk, type: INT64 }
+      - table: dim_client
+        columns:
+          - { name: client_sk, type: INT64 }
+      - table: dim_program
+        columns:
+          - { name: program_sk, type: INT64 }
+      - table: dim_queue
+        columns:
+          - { name: queue_sk, type: INT64 }
+      - table: dim_site
+        columns:
+          - { name: site_sk, type: INT64 }
+      - table: dim_shift
+        columns:
+          - { name: shift_sk, type: INT64 }
+      - table: dim_org
+        columns:
+          - { name: org_sk, type: INT64 }
+      - table: dim_disposition
+        columns:
+          - { name: disposition_sk, type: INT64 }
+      - table: fact_interaction
+        partition_by: date_key
+        cluster_by: [channel, agent_sk, client_sk]
+        columns:
+          - { name: date_key, type: INT64 }
+          - { name: channel, type: STRING }
+          - { name: agent_sk, type: INT64 }
+          - { name: client_sk, type: INT64 }
+      - table: fact_agent_activity
+        partition_by: date_key
+        cluster_by: [agent_sk, state_code]
+        columns:
+          - { name: date_key, type: INT64 }
+          - { name: agent_sk, type: INT64 }
+          - { name: state_code, type: STRING }
+      - table: fact_queue_interval
+        partition_by: date_key
+        cluster_by: [queue_sk]
+        columns:
+          - { name: date_key, type: INT64 }
+          - { name: queue_sk, type: INT64 }
+      - table: fact_csat_survey
+        partition_by: date_key
+        cluster_by: [program_sk]
+        columns:
+          - { name: date_key, type: INT64 }
+          - { name: program_sk, type: INT64 }
+      - table: fact_qa_evaluation
+        partition_by: date_key
+        columns:
+          - { name: date_key, type: INT64 }
+      - table: fact_billing_line
+        partition_by: period_month
+        cluster_by: [client_sk, program_sk]
+        columns:
+          - { name: period_month, type: DATE }
+          - { name: client_sk, type: INT64 }
+          - { name: program_sk, type: INT64 }
+      - table: fact_adherence_daily
+        partition_by: date_key
+        columns:
+          - { name: date_key, type: INT64 }
+      - table: fact_ticket
+        partition_by: date_key
+        columns:
+          - { name: date_key, type: INT64 }
+      - table: fact_ivr_path
+        partition_by: date_key
+        columns:
+          - { name: date_key, type: INT64 }
+      - table: agg_agent_daily
+        partition_by: date_key
+        cluster_by: [agent_sk]
+        columns:
+          - { name: date_key, type: INT64 }
+          - { name: agent_sk, type: INT64 }
+      - table: agg_agent_weekly
+        partition_by: week_start_key
+        columns:
+          - { name: week_start_key, type: INT64 }
+      - table: agg_program_monthly
+        partition_by: period_month
+        columns:
+          - { name: period_month, type: DATE }
+      - table: agg_queue_hourly
+        partition_by: date_key
+        columns:
+          - { name: date_key, type: INT64 }
+      - table: agg_csat_rollup_monthly
+        partition_by: period_month
+        columns:
+          - { name: period_month, type: DATE }
+      - table: agg_billing_monthly
+        partition_by: period_month
+        cluster_by: [client_sk, program_sk]
+        columns:
+          - { name: period_month, type: DATE }
+          - { name: client_sk, type: INT64 }
+          - { name: program_sk, type: INT64 }
+      - table: agg_site_daily
+        partition_by: date_key
+        columns:
+          - { name: date_key, type: INT64 }
