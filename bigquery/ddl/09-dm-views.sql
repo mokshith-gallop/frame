@@ -58,8 +58,8 @@ SELECT p.client_id,
        COUNT(*)                                           AS surveys,
        SUM(s.csat_score)                                  AS sum_csat,
        SUM(CASE WHEN s.nps_score >= 9 THEN 1 ELSE 0 END) AS promoter_count
-FROM   fact_csat_survey s
-JOIN   dim_program p ON p.program_sk = s.program_sk
+FROM   ${BUILD_DATASET}.fact_csat_survey s
+JOIN   ${BUILD_DATASET}.dim_program p ON p.program_sk = s.program_sk
 GROUP  BY p.client_id, p.program_code;
 
 -- 4. Call-driver classification (RLIKE -> REGEXP_CONTAINS, regexp_extract -> REGEXP_EXTRACT)
@@ -148,8 +148,8 @@ SELECT a.agent_sk,
        COUNT(d.date_key)                            AS daily_records,
        SUM(CAST(d.adherence_pct AS FLOAT64))        AS sum_adherence,
        SUM(CAST(d.avg_handle_seconds AS FLOAT64))   AS sum_aht
-FROM   dim_agent a
-JOIN   agg_agent_daily d ON d.agent_sk = a.agent_sk
+FROM   ${BUILD_DATASET}.dim_agent a
+JOIN   ${BUILD_DATASET}.agg_agent_daily d ON d.agent_sk = a.agent_sk
 WHERE  a.is_current = TRUE
 GROUP  BY a.agent_sk, a.full_name, a.site_code, a.job_grade;
 
@@ -327,14 +327,14 @@ LEFT   JOIN (
 -- BQ MVs do not support scalar transforms on aggregates.
 -- Raw aggregates materialized; sl_pct derived via query.
 CREATE MATERIALIZED VIEW IF NOT EXISTS mv_agg_queue_hourly AS
-SELECT fact_queue_interval.queue_sk,
-       EXTRACT(HOUR FROM fact_queue_interval.interval_start_ts) AS hour_of_day,
-       SUM(fact_queue_interval.offered)                         AS offered,
-       SUM(fact_queue_interval.answered)                        AS answered,
-       SUM(fact_queue_interval.abandoned)                       AS abandoned,
-       SUM(fact_queue_interval.answered_in_sl)                  AS answered_in_sl,
-       fact_queue_interval.date_key
-FROM   fact_queue_interval
-GROUP  BY fact_queue_interval.queue_sk,
-       EXTRACT(HOUR FROM fact_queue_interval.interval_start_ts),
-       fact_queue_interval.date_key;
+SELECT fqi.queue_sk,
+       EXTRACT(HOUR FROM fqi.interval_start_ts) AS hour_of_day,
+       SUM(fqi.offered)                         AS offered,
+       SUM(fqi.answered)                        AS answered,
+       SUM(fqi.abandoned)                       AS abandoned,
+       SUM(fqi.answered_in_sl)                  AS answered_in_sl,
+       fqi.date_key
+FROM   ${BUILD_DATASET}.fact_queue_interval fqi
+GROUP  BY fqi.queue_sk,
+       EXTRACT(HOUR FROM fqi.interval_start_ts),
+       fqi.date_key;
