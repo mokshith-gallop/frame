@@ -1531,7 +1531,7 @@ suites:
           - { name: agent_id, type: INT64 }
           - { name: full_name, type: STRING }
           - { name: site_code, type: STRING }
-          - { name: adherence_90d, type: FLOAT64 }
+          - { name: adherence_90d, type: NUMERIC, scale: 2 }
           - { name: notice_events, type: INT64 }
           - { name: attrition_risk, type: STRING }
       - table: vw_queue_sla_attainment
